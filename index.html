@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>単語帳アプリ | Vocabulary Flashcard App</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- PapaParse for CSV reading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="title">📚 単語帳アプリ</h1>
+            <p class="subtitle">Vocabulary Flashcard App</p>
+        </header>
+
+        <!-- File Upload Section -->
+        <div id="uploadSection" class="upload-section">
+            <div class="upload-card">
+                <div class="upload-icon">📁</div>
+                <h2>データを読み込んでいます...</h2>
+                <p>Loading vocabulary data from Google Sheets...</p>
+                <div class="loader"></div>
+            </div>
+        </div>
+
+        <!-- Main App Section (hidden initially) -->
+        <main id="appSection" class="app-section hidden">
+            <!-- Mode Selector -->
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="flashcard">
+                    <span class="mode-icon">🎴</span>
+                    <span>フラッシュカード</span>
+                </button>
+                <button class="mode-btn" data-mode="quiz">
+                    <span class="mode-icon">❓</span>
+                    <span>クイズ</span>
+                </button>
+                <button class="mode-btn" data-mode="type">
+                    <span class="mode-icon">⌨️</span>
+                    <span>入力</span>
+                </button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-stats">
+                    <span id="progressText">0 / 0 学習済み</span>
+                    <span id="accuracyText">正解率: 0%</span>
+                </div>
+            </div>
+
+            <!-- Flashcard Container -->
+            <div class="flashcard-container">
+                <div class="flashcard" id="flashcard">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front">
+                            <div class="card-label">日本語</div>
+                            <div class="card-content" id="frontContent"></div>
+                            <div class="card-hint">クリックして反転 / Click to flip</div>
+                        </div>
+                        <div class="flashcard-back">
+                            <div class="card-label">English</div>
+                            <div class="card-content" id="backContent"></div>
+                            <div class="card-hint">クリックして反転 / Click to flip</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Mode Container (hidden initially) -->
+            <div class="quiz-container hidden" id="quizContainer">
+                <div class="quiz-question">
+                    <div class="card-label">日本語</div>
+                    <div class="quiz-word" id="quizWord"></div>
+                </div>
+                <div class="quiz-options" id="quizOptions">
+                    <!-- Options will be generated dynamically -->
+                </div>
+                <div class="quiz-feedback hidden" id="quizFeedback"></div>
+            </div>
+
+            <!-- Type Mode Container (hidden initially) -->
+            <div class="type-container hidden" id="typeContainer">
+                <div class="type-question">
+                    <div class="card-label">日本語</div>
+                    <div class="type-word" id="typeWord"></div>
+                </div>
+                <div class="type-input-group">
+                    <input type="text" class="type-input" id="typeInput" placeholder="英語を入力してください...">
+                    <button class="type-submit-btn" id="typeSubmit">確認</button>
+                </div>
+                <div class="type-feedback hidden" id="typeFeedback"></div>
+            </div>
+
+            <!-- Navigation Controls -->
+            <div class="controls">
+                <button class="control-btn" id="prevBtn">
+                    <span>← 前へ</span>
+                </button>
+                <div class="card-counter" id="cardCounter">1 / 6</div>
+                <button class="control-btn" id="nextBtn">
+                    <span>次へ →</span>
+                </button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="action-btn" id="shuffleBtn">
+                    <span>🔀</span>
+                    <span>シャッフル</span>
+                </button>
+                <button class="action-btn" id="resetBtn">
+                    <span>🔄</span>
+                    <span>リセット</span>
+                </button>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>キーボードショートカット: Space (反転) | ← → (移動)</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
