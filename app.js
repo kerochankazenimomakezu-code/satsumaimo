@@ -7,6 +7,7 @@ let currentMode = 'flashcard';
 let studiedCards = new Set();
 let correctAnswers = 0;
 let totalAttempts = 0;
+let isJapaneseToEnglish = true;
 
 // ===================================
 // DOM Elements
@@ -26,6 +27,12 @@ const flashcardContainer = document.querySelector('.flashcard-container');
 const quizContainer = document.getElementById('quizContainer');
 const typeContainer = document.getElementById('typeContainer');
 
+// Labels
+const frontLabel = document.getElementById('frontLabel');
+const backLabel = document.getElementById('backLabel');
+const quizLabel = document.getElementById('quizLabel');
+const typeLabel = document.getElementById('typeLabel');
+
 // Quiz elements
 const quizWord = document.getElementById('quizWord');
 const quizOptions = document.getElementById('quizOptions');
@@ -42,6 +49,8 @@ const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 const shuffleBtn = document.getElementById('shuffleBtn');
 const resetBtn = document.getElementById('resetBtn');
+const swapLangBtn = document.getElementById('swapLangBtn');
+const swapLangText = document.getElementById('swapLangText');
 const modeBtns = document.querySelectorAll('.mode-btn');
 
 // ===================================
@@ -145,6 +154,7 @@ function setupEventListeners() {
     // Actions
     shuffleBtn.addEventListener('click', shuffleCards);
     resetBtn.addEventListener('click', resetProgress);
+    swapLangBtn.addEventListener('click', toggleLanguageDirection);
 
     // Mode switching
     modeBtns.forEach(btn => {
@@ -182,6 +192,35 @@ function setupEventListeners() {
 // ===================================
 // Helper Functions
 // ===================================
+
+function toggleLanguageDirection() {
+    isJapaneseToEnglish = !isJapaneseToEnglish;
+
+    // Update button text
+    swapLangText.textContent = isJapaneseToEnglish ? '日 ➔ 英' : '英 ➔ 日';
+
+    // Update labels
+    const frontLabelText = isJapaneseToEnglish ? '日本語' : 'English';
+    const backLabelText = isJapaneseToEnglish ? 'English' : '日本語';
+
+    frontLabel.textContent = frontLabelText;
+    backLabel.textContent = backLabelText;
+    quizLabel.textContent = frontLabelText;
+    typeLabel.textContent = frontLabelText;
+
+    // Reset flashcard flip state if needed
+    flashcard.classList.remove('flipped');
+
+    // Re-render current mode
+    if (currentMode === 'quiz') {
+        setupQuizMode();
+    } else if (currentMode === 'type') {
+        setupTypeMode();
+    } else {
+        updateCard();
+    }
+}
+
 // 文字数に応じてフォントサイズを動的に変更する関数
 function adjustFontSize(element, text) {
     if (!text) return;
@@ -275,11 +314,14 @@ function updateCard() {
 
     const card = vocabulary[currentIndex];
 
-    frontContent.textContent = card.japanese;
-    adjustFontSize(frontContent, card.japanese);
+    const frontText = isJapaneseToEnglish ? card.japanese : card.english;
+    const backText = isJapaneseToEnglish ? card.english : card.japanese;
 
-    backContent.textContent = card.english;
-    adjustFontSize(backContent, card.english);
+    frontContent.textContent = frontText;
+    adjustFontSize(frontContent, frontText);
+
+    backContent.textContent = backText;
+    adjustFontSize(backContent, backText);
 }
 
 function markAsStudied() {
@@ -294,19 +336,23 @@ function markAsStudied() {
 function setupQuizMode() {
     const card = vocabulary[currentIndex];
 
-    quizWord.textContent = card.japanese;
-    adjustFontSize(quizWord, card.japanese);
+    const questionText = isJapaneseToEnglish ? card.japanese : card.english;
+    const answerText = isJapaneseToEnglish ? card.english : card.japanese;
+
+    quizWord.textContent = questionText;
+    adjustFontSize(quizWord, questionText);
 
     quizFeedback.classList.add('hidden');
 
     // Generate options (1 correct + 3 random)
-    const options = [card.english];
+    const options = [answerText];
     const usedIndices = new Set([currentIndex]);
 
     while (options.length < 4 && options.length < vocabulary.length) {
         const randomIndex = Math.floor(Math.random() * vocabulary.length);
         if (!usedIndices.has(randomIndex)) {
-            options.push(vocabulary[randomIndex].english);
+            const randomAnswerText = isJapaneseToEnglish ? vocabulary[randomIndex].english : vocabulary[randomIndex].japanese;
+            options.push(randomAnswerText);
             usedIndices.add(randomIndex);
         }
     }
@@ -320,7 +366,9 @@ function setupQuizMode() {
         const btn = document.createElement('button');
         btn.className = 'quiz-option';
         btn.textContent = option;
-        btn.addEventListener('click', () => checkQuizAnswer(btn, option, card.english));
+        // Dynamically adjust font size for options if they are long
+        adjustFontSize(btn, option);
+        btn.addEventListener('click', () => checkQuizAnswer(btn, option, answerText));
         quizOptions.appendChild(btn);
     });
 }
@@ -368,18 +416,23 @@ function checkQuizAnswer(btn, selected, correct) {
 function setupTypeMode() {
     const card = vocabulary[currentIndex];
 
-    typeWord.textContent = card.japanese;
-    adjustFontSize(typeWord, card.japanese);
+    const questionText = isJapaneseToEnglish ? card.japanese : card.english;
+
+    typeWord.textContent = questionText;
+    adjustFontSize(typeWord, questionText);
 
     typeInput.value = '';
+    typeInput.placeholder = isJapaneseToEnglish ? "英語を入力してください..." : "日本語を入力してください...";
     typeFeedback.classList.add('hidden');
     typeInput.focus();
 }
 
 function checkTypeAnswer() {
     const card = vocabulary[currentIndex];
+    const expectedAnswer = isJapaneseToEnglish ? card.english : card.japanese;
+
     const userAnswer = typeInput.value.trim().toLowerCase();
-    const correctAnswer = card.english.trim().toLowerCase();
+    const correctAnswer = expectedAnswer.trim().toLowerCase();
 
     totalAttempts++;
 
@@ -395,7 +448,7 @@ function checkTypeAnswer() {
         }, 1500);
     } else {
         vocabulary[currentIndex].incorrect++;
-        typeFeedback.innerHTML = `❌ 不正解。正解は「${card.english}」です。`;
+        typeFeedback.innerHTML = `❌ 不正解。正解は「${expectedAnswer}」です。`;
         typeFeedback.className = 'type-feedback error';
     }
 

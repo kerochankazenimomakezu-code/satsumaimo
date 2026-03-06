@@ -574,10 +574,12 @@ body {
     display: flex;
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap;
 }
 
 .action-btn {
     flex: 1;
+    min-width: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
