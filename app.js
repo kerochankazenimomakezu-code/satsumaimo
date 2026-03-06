@@ -7,7 +7,7 @@ let currentMode = 'flashcard';
 let studiedCards = new Set();
 let correctAnswers = 0;
 let totalAttempts = 0;
-let isJapaneseToEnglish = true;
+let isJapaneseToEnglish = false;
 
 // ===================================
 // DOM Elements
