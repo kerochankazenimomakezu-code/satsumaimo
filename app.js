@@ -162,8 +162,54 @@ function setupEventListeners() {
         }
     });
 
+    // Font size resize listener
+    window.addEventListener('resize', () => {
+        if (vocabulary.length > 0) {
+            if (currentMode === 'flashcard') {
+                updateCard();
+            } else if (currentMode === 'quiz') {
+                adjustFontSize(quizWord, vocabulary[currentIndex].japanese);
+            } else if (currentMode === 'type') {
+                adjustFontSize(typeWord, vocabulary[currentIndex].japanese);
+            }
+        }
+    });
+
     // Keyboard shortcuts
     document.addEventListener('keydown', handleKeyboard);
+}
+
+// ===================================
+// Helper Functions
+// ===================================
+// 文字数に応じてフォントサイズを動的に変更する関数
+function adjustFontSize(element, text) {
+    if (!text) return;
+    const length = text.length;
+    let fontSize = '';
+
+    if (window.innerWidth <= 480) {
+        if (length > 150) fontSize = '0.85rem';
+        else if (length > 100) fontSize = '0.95rem';
+        else if (length > 50) fontSize = '1.1rem';
+        else if (length > 20) fontSize = '1.3rem';
+        else fontSize = '1.5rem';
+    } else if (window.innerWidth <= 768) {
+        if (length > 150) fontSize = '1.0rem';
+        else if (length > 100) fontSize = '1.1rem';
+        else if (length > 50) fontSize = '1.3rem';
+        else if (length > 20) fontSize = '1.6rem';
+        else fontSize = '2.0rem';
+    } else {
+        if (length > 200) fontSize = '1.1rem';
+        else if (length > 150) fontSize = '1.2rem';
+        else if (length > 100) fontSize = '1.4rem';
+        else if (length > 50) fontSize = '1.7rem';
+        else if (length > 25) fontSize = '2.1rem';
+        else fontSize = '2.5rem';
+    }
+
+    element.style.fontSize = fontSize;
 }
 
 // ===================================
@@ -228,8 +274,12 @@ function updateCard() {
     if (vocabulary.length === 0) return;
 
     const card = vocabulary[currentIndex];
+
     frontContent.textContent = card.japanese;
+    adjustFontSize(frontContent, card.japanese);
+
     backContent.textContent = card.english;
+    adjustFontSize(backContent, card.english);
 }
 
 function markAsStudied() {
@@ -243,7 +293,10 @@ function markAsStudied() {
 // ===================================
 function setupQuizMode() {
     const card = vocabulary[currentIndex];
+
     quizWord.textContent = card.japanese;
+    adjustFontSize(quizWord, card.japanese);
+
     quizFeedback.classList.add('hidden');
 
     // Generate options (1 correct + 3 random)
@@ -314,7 +367,10 @@ function checkQuizAnswer(btn, selected, correct) {
 // ===================================
 function setupTypeMode() {
     const card = vocabulary[currentIndex];
+
     typeWord.textContent = card.japanese;
+    adjustFontSize(typeWord, card.japanese);
+
     typeInput.value = '';
     typeFeedback.classList.add('hidden');
     typeInput.focus();
